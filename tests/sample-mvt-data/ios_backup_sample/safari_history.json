@@ -1,0 +1,14 @@
+[
+    {
+        "isodate": "2025-01-29 22:43:10.000000",
+        "url": "https://track-parcel.example/a1",
+        "visit_id": 41,
+        "redirect_source": null
+    },
+    {
+        "isodate": "2025-01-30 08:02:33.000000",
+        "url": "https://news.example.org/",
+        "visit_id": 42,
+        "redirect_source": null
+    }
+]

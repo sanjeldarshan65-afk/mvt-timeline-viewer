@@ -1,227 +1,61 @@
 /**
- * Sample MVT Data Generator
- * 
- * Creates realistic-looking MVT JSON files based on
- * Mobile Verification Toolkit structure and Graphite indicators.
+ * Writes a FAKE MVT results folder for tests and demos.
+ * Layout mirrors `mvt-ios check-backup --output <dir>`:
+ *   <module>.json            records a module extracted (context)
+ *   <module>_detected.json   records that matched an IOC (suspicious)
+ *   timeline.csv             all records as events
+ *   timeline_detected.csv    only IOC-matched events
+ *   info.json, command.log   run metadata
+ * All data is invented. Indicator domains use the reserved .example TLD.
  */
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const fs = require('fs');
-const path = require('path');
+const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), 'sample-mvt-data', 'ios_backup_sample');
 
-const SAMPLE_DIR = path.join(__dirname, 'sample-mvt-data');
+const sms = [
+  { isodate: '2025-01-28 09:14:02.000000', direction: 'received', phone_number: '+15550100001', text: 'Lunch at 1?', links: [] },
+  { isodate: '2025-01-29 22:41:57.000000', direction: 'received', phone_number: '+15550100002', text: 'Your parcel is held: https://track-parcel.example/a1', links: ['https://track-parcel.example/a1'] },
+];
+const safari_history = [
+  { isodate: '2025-01-29 22:43:10.000000', url: 'https://track-parcel.example/a1', visit_id: 41, redirect_source: null },
+  { isodate: '2025-01-30 08:02:33.000000', url: 'https://news.example.org/', visit_id: 42, redirect_source: null },
+];
+const datausage = [
+  { first_isodate: '2025-01-29 22:43:11.000000', isodate: '2025-01-29 22:44:02.000000', proc_name: 'fakeprocessd', bundle_id: '', wwan_in: 0, wwan_out: 0, wifi_in: 18234, wifi_out: 90211 },
+];
 
-/**
- * Create sample MVT results for a single Android device
- */
-function createAndroidSample() {
-  const androidId = 'android_device_sample_001';
-  
-  // Device metadata report
-  const metaReport = {
-    name: 'meta_report.json',
-    source: 'meta_report.json',
-    date: new Date(Date.now() - 86400000 * 5).toISOString(), // 5 days ago
-    device_path: '/data/data/com.whatsapp/files/',
-    filename: 'meta_report.json',
-    device_info: {
-      android_id: androidId,
-      model: 'SM-G991B',
-      carrier: 'T-Mobile',
-      os_version: '13',
-      build_date: '2024-05-15',
-      imei: '357436281056473'
-    },
-    report_data: {
-      android_id: androidId,
-      model: 'SM-G991B',
-      carrier: 'T-Mobile',
-      os_version: '13'
-    }
-  };
+const detected = {
+  sms: [sms[1]],
+  safari_history: [safari_history[0]],
+  datausage: [datausage[0]],
+};
 
-  // EXIF report (usually just metadata)
-  const exifReport = {
-    name: 'exif_report.json',
-    source: 'exif_report.json',
-    date: new Date(Date.now() - 86400000 * 4).toISOString(),
-    device_path: '/storage/emulated/0/DCIM/Camera/',
-    filename: 'IMG_20240515_103045.jpg',
-    report_data: {
-      fields: [
-        { device_path: '/storage/emulated/0/DCIM/Camera/IMG_20240515_103045.jpg', filename: 'IMG_20240515_103045.jpg', field: 'make', value: 'Samsung' },
-        { device_path: '/storage/emulated/0/DCIM/Camera/IMG_20240515_103045.jpg', filename: 'IMG_20240515_103045.jpg', field: 'model', value: 'SM-G991B' }
-      ]
-    }
-  };
+const csvRow = (cols) => cols.map((c) => `"${String(c).replaceAll('"', '""')}"`).join(',');
+const header = csvRow(['UTC Timestamp', 'Plugin', 'Event', 'Description']);
+const events = [
+  ['2025-01-28 09:14:02.000000', 'SMS', 'sms_received', `${sms[0].phone_number}: ${sms[0].text}`],
+  ['2025-01-29 22:41:57.000000', 'SMS', 'sms_received', `${sms[1].phone_number}: ${sms[1].text}`],
+  ['2025-01-29 22:43:10.000000', 'SafariHistory', 'safari_history', safari_history[0].url],
+  ['2025-01-29 22:44:02.000000', 'Datausage', 'datausage', `${datausage[0].proc_name} WIFI IN: 18234, WIFI OUT: 90211`],
+  ['2025-01-30 08:02:33.000000', 'SafariHistory', 'safari_history', safari_history[1].url],
+];
+const isDetected = (e) => /track-parcel\.example|fakeprocessd/.test(e[3]);
 
-  // Gallery report with suspicious WhatsApp activity (Graphite indicator)
-  const galleryReport = {
-    name: 'gallery_report.json',
-    source: 'gallery_report.json',
-    date: new Date(Date.now() - 86400000 * 3).toISOString(),
-    device_path: '/storage/emulated/0/WhatsApp/Media/.Statuses/',
-    filename: 'gallery_report.json',
-    report_data: {
-      entries: [
-        {
-          device_path: '/storage/emulated/0/WhatsApp/Media/.Statuses/',
-          filename: 'IMG_20240513_143022.jpg',
-          title: 'IMG_20240513_143022.jpg',
-          date: new Date(Date.now() - 86400000 * 3).toISOString(),
-          mime_type: 'image/jpeg',
-          chat_id: '123456789012345678',
-          sender: 'Unknown',
-          keywords: ['meeting', 'urgent', 'project'],
-          category: 'SUSPICIOUS'
-        },
-        {
-          device_path: '/storage/emulated/0/WhatsApp/Media/.Statuses/',
-          filename: 'IMG_20240513_143100.jpg',
-          title: 'IMG_20240513_143100.jpg',
-          date: new Date(Date.now() - 86400000 * 3).toISOString(),
-          mime_type: 'image/jpeg',
-          chat_id: '123456789012345678',
-          sender: 'Unknown',
-          keywords: ['confidential', 'budget'],
-          category: 'SUSPICIOUS'
-        }
-      ]
-    }
-  };
-
-  // BIGPRETZEL artifact (confirmed Graphite indicator)
-  const bigPretzelReport = {
-    name: 'bigpretzel_artifact.json',
-    source: 'BIGPRETZEL_artifact.json',
-    date: new Date(Date.now() - 86400000 * 2).toISOString(),
-    device_path: '/data/data/com.android.providers.media/databases/mediadb.db',
-    filename: 'BIGPRETZEL_artifact.json',
-    report_data: {
-      binary_name: 'BIGPRETZEL',
-      version: '2.1.0',
-      install_date: '2025-01-30T08:23:15-05:00',
-      last_seen: '2025-01-31T14:45:30-05:00',
-      permissions: [
-        'READ_PHONE_STATE',
-        'ACCESS_FINE_LOCATION',
-        'RECEIVE_BOOT_COMPLETED'
-      ],
-      binary_path: '/data/data/com.graphite.forensic/files/BIGPRETZEL.so',
-      size_bytes: 1048576,
-      category: 'CONFIRMED'
-    }
-  };
-
-  return {
-    device_info: {
-      android_id: androidId,
-      model: 'SM-G991B',
-      carrier: 'T-Mobile',
-      os_version: '13'
-    },
-    reports: [metaReport, exifReport, galleryReport, bigPretzelReport]
-  };
+export function writeSample(out = OUT) {
+  fs.rmSync(out, { recursive: true, force: true });
+  fs.mkdirSync(out, { recursive: true });
+  const w = (name, data) => fs.writeFileSync(path.join(out, name), typeof data === 'string' ? data : JSON.stringify(data, null, 4));
+  w('sms.json', sms);
+  w('safari_history.json', safari_history);
+  w('datausage.json', datausage);
+  for (const [mod, recs] of Object.entries(detected)) w(`${mod}_detected.json`, recs);
+  w('timeline.csv', [header, ...events.map(csvRow)].join('\n') + '\n');
+  w('timeline_detected.csv', [header, ...events.filter(isDetected).map(csvRow)].join('\n') + '\n');
+  w('info.json', { mvt_version: '2.x (sample)', target_path: '/path/to/backup', date: '2025-02-01 10:00:00', ioc_files: ['sample-indicators.stix2'] });
+  w('command.log', 'SAMPLE DATA - not produced by a real MVT run\n');
+  return out;
 }
 
-/**
- * Create sample MVT results for iOS device
- */
-function createiOSSample() {
-  // iOS device metadata (simulated)
-  const iosDeviceReport = {
-    name: 'ios_device_meta.json',
-    source: 'iOS_Device_MetaData.json',
-    date: new Date(Date.now() - 86400000 * 10).toISOString(),
-    device_path: '/var/mobile/Library/Preferences/',
-    filename: 'ios_device_meta.json',
-    device_info: {
-      device_id: 'iPhone_14_Pro_Unknown_User',
-      model: 'iPhone15,2',
-      carrier: 'Verizon',
-      os_version: '18.2.1',
-      build_date: '2025-01-20',
-      imei: '357436281056999'
-    },
-    report_data: {
-      device_id: 'iPhone_14_Pro_Unknown_User',
-      model: 'iPhone15,2',
-      carrier: 'Verizon',
-      os_version: '18.2.1'
-    }
-  };
-
-  // CVE-2025-43200 indicator (confirmed iOS zero-click)
-  const cve202543200Report = {
-    name: 'cve_2025_43200_artifact.json',
-    source: 'CVE-2025-43200_Artifact.json',
-    date: new Date(Date.now() - 86400000 * 9).toISOString(),
-    device_path: '/var/mobile/Containers/Data/Application/',
-    filename: 'CVE-2025-43200_Artifact.json',
-    report_data: {
-      vulnerability_id: 'CVE-2025-43200',
-      affected_version: '18.2.1',
-      fixed_in: '18.3.1',
-      attack_vector: 'Zero-click iMessage',
-      detected_at: '2025-06-15T10:22:45-04:00',
-      chat_id: '147852369012345678',
-      sender: 'Ciro Pellegrino',
-      keywords: ['journal', 'investigation', 'source'],
-      category: 'CONFIRMED'
-    }
-  };
-
-  return {
-    device_info: {
-      device_id: 'iPhone_14_Pro_Unknown_User',
-      model: 'iPhone15,2',
-      carrier: 'Verizon',
-      os_version: '18.2.1'
-    },
-    reports: [iosDeviceReport, cve202543200Report]
-  };
-}
-
-/**
- * Main: Create sample data directory and files
- */
-function main() {
-  // Create sample directory
-  if (!fs.existsSync(SAMPLE_DIR)) {
-    fs.mkdirSync(SAMPLE_DIR, { recursive: true });
-    console.log('Created sample directory:', SAMPLE_DIR);
-  }
-
-  // Create Android sample
-  const androidSample = createAndroidSample();
-  const androidPath = path.join(SAMPLE_DIR, 'android_device_sample_001.json');
-  fs.writeFileSync(androidPath, JSON.stringify(androidSample, null, 2));
-  console.log('Created Android sample:', androidPath);
-
-  // Create iOS sample
-  const iosSample = createiOSSample();
-  const iosPath = path.join(SAMPLE_DIR, 'ios_device_sample_001.json');
-  fs.writeFileSync(iosPath, JSON.stringify(iosSample, null, 2));
-  console.log('Created iOS sample:', iosPath);
-
-  // Create combined sample (multiple devices)
-  const combinedSample = {
-    device_info: {
-      investigation_id: 'INV-2025-001',
-      investigator: 'John Doe',
-      notes: 'Combined analysis of Android and iOS devices from Graphite investigation'
-    },
-    reports: [
-      ...androidSample.reports,
-      ...iosSample.reports
-    ]
-  };
-  const combinedPath = path.join(SAMPLE_DIR, 'combined_investigation.json');
-  fs.writeFileSync(combinedPath, JSON.stringify(combinedSample, null, 2));
-  console.log('Created combined sample:', combinedPath);
-
-  console.log('\nSample data generation complete!');
-  console.log('Files created in:', SAMPLE_DIR);
-  console.log('\nRun "npm run sample-data" to regenerate.');
-}
-
-main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) console.log('Wrote', writeSample());

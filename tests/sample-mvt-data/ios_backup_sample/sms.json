@@ -1,0 +1,18 @@
+[
+    {
+        "isodate": "2025-01-28 09:14:02.000000",
+        "direction": "received",
+        "phone_number": "+15550100001",
+        "text": "Lunch at 1?",
+        "links": []
+    },
+    {
+        "isodate": "2025-01-29 22:41:57.000000",
+        "direction": "received",
+        "phone_number": "+15550100002",
+        "text": "Your parcel is held: https://track-parcel.example/a1",
+        "links": [
+            "https://track-parcel.example/a1"
+        ]
+    }
+]

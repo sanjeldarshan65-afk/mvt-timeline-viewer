@@ -1,0 +1,12 @@
+[
+    {
+        "first_isodate": "2025-01-29 22:43:11.000000",
+        "isodate": "2025-01-29 22:44:02.000000",
+        "proc_name": "fakeprocessd",
+        "bundle_id": "",
+        "wwan_in": 0,
+        "wwan_out": 0,
+        "wifi_in": 18234,
+        "wifi_out": 90211
+    }
+]

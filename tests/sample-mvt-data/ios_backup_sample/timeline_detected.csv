@@ -1,0 +1,4 @@
+"UTC Timestamp","Plugin","Event","Description"
+"2025-01-29 22:41:57.000000","SMS","sms_received","+15550100002: Your parcel is held: https://track-parcel.example/a1"
+"2025-01-29 22:43:10.000000","SafariHistory","safari_history","https://track-parcel.example/a1"
+"2025-01-29 22:44:02.000000","Datausage","datausage","fakeprocessd WIFI IN: 18234, WIFI OUT: 90211"
