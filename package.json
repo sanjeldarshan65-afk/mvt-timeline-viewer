@@ -1,0 +1,33 @@
+{
+  "name": "graphite-evidence-viewer",
+  "version": "0.1.0",
+  "description": "MVT forensic evidence viewer and timeline visualization for Graphite spyware investigations",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "jest",
+    "sample-data": "node tests/sample-data-generator.js",
+    "docs": "node scripts/generate-docs.js"
+  },
+  "keywords": [
+    "MVT",
+    "Mobile Verification Toolkit",
+    "forensics",
+    "Graphite",
+    "spyware",
+    "timeline"
+  ],
+  "author": "CyberOffense Team",
+  "license": "MIT",
+  "dependencies": {
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "jest": "^29.7.0",
+    "@testing-library/react": "^16.0.0"
+  }
+}

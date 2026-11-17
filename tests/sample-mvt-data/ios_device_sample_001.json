@@ -1,0 +1,53 @@
+{
+  "device_info": {
+    "device_id": "iPhone_14_Pro_Unknown_User",
+    "model": "iPhone15,2",
+    "carrier": "Verizon",
+    "os_version": "18.2.1"
+  },
+  "reports": [
+    {
+      "name": "ios_device_meta.json",
+      "source": "iOS_Device_MetaData.json",
+      "date": "2026-11-07T18:13:12.987Z",
+      "device_path": "/var/mobile/Library/Preferences/",
+      "filename": "ios_device_meta.json",
+      "device_info": {
+        "device_id": "iPhone_14_Pro_Unknown_User",
+        "model": "iPhone15,2",
+        "carrier": "Verizon",
+        "os_version": "18.2.1",
+        "build_date": "2025-01-20",
+        "imei": "357436281056999"
+      },
+      "report_data": {
+        "device_id": "iPhone_14_Pro_Unknown_User",
+        "model": "iPhone15,2",
+        "carrier": "Verizon",
+        "os_version": "18.2.1"
+      }
+    },
+    {
+      "name": "cve_2025_43200_artifact.json",
+      "source": "CVE-2025-43200_Artifact.json",
+      "date": "2026-11-08T18:13:12.987Z",
+      "device_path": "/var/mobile/Containers/Data/Application/",
+      "filename": "CVE-2025-43200_Artifact.json",
+      "report_data": {
+        "vulnerability_id": "CVE-2025-43200",
+        "affected_version": "18.2.1",
+        "fixed_in": "18.3.1",
+        "attack_vector": "Zero-click iMessage",
+        "detected_at": "2025-06-15T10:22:45-04:00",
+        "chat_id": "147852369012345678",
+        "sender": "Ciro Pellegrino",
+        "keywords": [
+          "journal",
+          "investigation",
+          "source"
+        ],
+        "category": "CONFIRMED"
+      }
+    }
+  ]
+}
