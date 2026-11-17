@@ -26,34 +26,65 @@
   </main>
 
   <script type="module">
-    import GraphiteEvidenceViewer from './src/index.js';
+    import { parseMvtFiles } from './src/parser/mvt.js';
 
-    const viewer = new GraphiteEvidenceViewer();
     const fileInput = document.getElementById('fileInput');
     const loadButton = document.getElementById('loadButton');
     const timelineContainer = document.getElementById('timeline');
 
+    // Escape HTML to prevent XSS
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     loadButton.addEventListener('click', async () => {
-      const file = fileInput.files[0];
-      if (!file) {
-        alert('Please select a file first');
+      const files = Array.from(fileInput.files);
+      if (files.length === 0) {
+        timelineContainer.innerHTML = '<div class="note">Please select a folder first</div>';
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const content = JSON.parse(e.target.result);
-          viewer.parsedData = await viewer.parser.parseFile(file.name, {
-            content
-          });
-          viewer.timelineView.buildTimeline();
-          timelineContainer.innerHTML = viewer.timelineView.generateHTML();
-        } catch (err) {
-          alert('Error parsing file: ' + err.message);
-        }
-      };
-      reader.readAsText(file);
+      // Read every file in the folder
+      const fileContents = {};
+      for (const file of files) {
+        const text = await file.text();
+        fileContents[file.name] = text;
+      }
+
+      // Parse the MVT files
+      const result = parseMvtFiles(fileContents);
+
+      // Calculate stats
+      const totalEvents = result.timeline.length;
+      const suspiciousCount = result.timeline.filter(r => r.label === 'suspicious (IOC match)').length;
+      const moduleCount = Object.keys(result.modules).length;
+
+      // Render summary
+      let html = '<div class="summary">';
+      html += '<div class="stat"><div class="stat-num">' + totalEvents + '</div><div class="stat-label">total events</div></div>';
+      html += '<div class="stat suspicious"><div class="stat-num">' + suspiciousCount + '</div><div class="stat-label">suspicious count</div></div>';
+      html += '<div class="stat"><div class="stat-num">' + moduleCount + '</div><div class="stat-label">module count</div></div>';
+      html += '</div>';
+
+      // Render timeline
+      html += '<div class="timeline">';
+      for (const row of result.timeline) {
+        const eventClass = row.label.startsWith('suspicious') ? 'event suspicious' : 'event';
+        const labelClass = row.label.startsWith('suspicious') ? 'label suspicious' : 'label context';
+        html += '<div class="' + eventClass + '">';
+        html += '<div><div class="event-time">' + escapeHtml(row.timestamp) + '</div><div class="event-plugin">' + escapeHtml(row.plugin) + '</div></div>';
+        html += '<div><div class="event-title">' + escapeHtml(row.event) + ' <span class="' + labelClass + '">' + escapeHtml(row.label) + '</span></div><div class="event-desc">' + escapeHtml(row.description) + '</div></div>';
+        html += '</div>';
+      }
+      html += '</div>';
+
+      timelineContainer.innerHTML = html;
     });
 
     // Allow Enter key to load file
