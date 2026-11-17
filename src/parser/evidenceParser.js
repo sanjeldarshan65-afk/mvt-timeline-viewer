@@ -113,6 +113,14 @@ class EvidenceParser {
       entriesArray = reportData.entries || [];
     } else if (reportType === 'exif') {
       entriesArray = reportData.fields || [];
+    } else if (reportType === 'unknown') {
+      // For unknown/other types, try to get entries from report_data directly
+      const reportDataObj = content.report_data;
+      if (reportDataObj && !Array.isArray(reportDataObj)) {
+        entriesArray = [reportDataObj]; // Single object
+      } else {
+        entriesArray = Array.isArray(reportDataObj) ? reportDataObj : [];
+      }
     } else {
       entriesArray = [];
     }
@@ -251,6 +259,14 @@ class EvidenceParser {
     }
     
     parsed.devices[deviceId].reports.push(reportData);
+    
+    // Update the breakdown counts
+    for (const categorizedEntry of reportData.categorizedEntries) {
+      const category = categorizedEntry.category.toLowerCase();
+      if (parsed.meta.breakdown[category] !== undefined) {
+        parsed.meta.breakdown[category]++;
+      }
+    }
   }
 
   /**
