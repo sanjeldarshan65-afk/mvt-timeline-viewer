@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test tests/",
+    "test": "node --test",
     "sample-data": "node tests/sample-data-generator.js"
   },
   "keywords": [
