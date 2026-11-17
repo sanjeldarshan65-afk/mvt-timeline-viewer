@@ -1,6 +1,6 @@
 import { parseMvtFiles } from './mvt.js';
 import { promises as fs } from 'node:fs';
-import path from 'node:path';
+import { join } from 'node:path';
 
 /**
  * Asynchronous parser that reads files from a directory using node:fs/promises
@@ -16,17 +16,13 @@ export async function parseMvtFolder(dir) {
   
   for (const file of files) {
     if (file.isFile()) {
-      const filePath = path.join(dir, file.name);
-      try {
-        const textContent = await fs.readFile(filePath, 'utf8');
-        fileContents[file.name] = textContent;
-      } catch (e) {
-        // Skip files that can't be read
-        console.warn(`Could not read ${file.name}: ${e.message}`);
-      }
+      const filePath = join(dir, file.name);
+      const textContent = await fs.readFile(filePath, 'utf8');
+      fileContents[filePath] = textContent;
     }
   }
   
   // Pass the file contents to the pure parser
+  // The parser expects {path: textContent} where path is the full file path
   return parseMvtFiles(fileContents);
 }
