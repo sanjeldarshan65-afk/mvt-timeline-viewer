@@ -1,2 +1,7 @@
 node_modules/
 dist/
+
+# Never commit real device data
+mvt-results/
+*backup*/
+!tests/sample-mvt-data/ios_backup_sample/
