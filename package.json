@@ -19,9 +19,6 @@
   ],
   "author": "Darshan Sanjel",
   "license": "MIT",
-  "dependencies": {
-    "date-fns": "^4.1.0"
-  },
   "devDependencies": {
     "vite": "^6.0.0"
   }
