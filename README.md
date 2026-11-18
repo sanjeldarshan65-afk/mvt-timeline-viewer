@@ -2,6 +2,8 @@
 
 Turn [Mobile Verification Toolkit (MVT)](https://docs.mvt.re/) results into a readable incident timeline, in your browser.
 
+**Live demo:** https://sanjeldarshan65-afk.github.io/mvt-timeline-viewer/ (click **Try the sample**)
+
 ![Timeline of the bundled sample: a phishing SMS, the link opened in Safari, then an unknown process uploading data, all flagged as IOC matches](docs/screenshot.jpg)
 
 MVT checks an iPhone backup or Android device against published indicators of compromise (IOCs) and writes a folder of JSON and CSV files. Those files are thorough but hard to read. This viewer puts every event on one timeline and marks which ones matched an indicator.
