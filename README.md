@@ -9,7 +9,9 @@ MVT checks an iPhone backup or Android device against published indicators of co
 ## What it does
 
 - Reads the folder MVT writes with `--output` (`timeline.csv`, `timeline_detected.csv`, `<module>.json`, `<module>_detected.json`, `info.json`).
-- Shows totals, then every event in time order.
+- Shows totals (events, IOC matches, modules, time span), then every event in time order.
+- Filter to suspicious events only, by module, or by free-text search (URLs, phone numbers, process names).
+- Handles large scans: 50,000 events load in well under a second, rendered 200 at a time.
 - Labels each event:
   - **suspicious (IOC match)**: the same row appears in `timeline_detected.csv`, meaning MVT matched it against an indicator.
   - **context**: everything else.
@@ -54,6 +56,7 @@ There is no build step for the viewer itself: `index.html` loads `src/parser/mvt
 
 ```
 index.html                     viewer page
+src/app.js                     UI: loading, filters, paging
 src/parser/mvt.js              pure parser: {filename: text} -> {info, modules, detected, timeline}
 src/parser/node.js             reads a folder from disk, for tests and scripts
 src/styles/theme.css           styles

@@ -112,3 +112,19 @@ a { color: var(--ink); text-decoration-color: var(--ember); text-underline-offse
 @media (max-width: 640px) {
   .event { grid-template-columns: 1fr; gap: .25rem; }
 }
+
+/* filter bar + paging */
+.filters { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin: 0 0 1.25rem; }
+.seg { display: inline-flex; border: 1px solid var(--field-line); border-radius: 6px; overflow: hidden; }
+.seg button { background: transparent; color: var(--muted); border: 0; padding: .5rem .9rem; font: 600 .85rem var(--body); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--field-line); }
+.seg button[aria-pressed="true"] { background: var(--fire); color: var(--on-fire); }
+.filters select, .filters input[type="search"] {
+  background: var(--sunk); color: var(--ink); border: 1px solid var(--field-line); border-radius: 6px;
+  padding: .5rem .7rem; font: .9rem var(--body);
+}
+.filters input[type="search"] { flex: 1 1 14rem; min-width: 0; }
+.count { font-family: var(--mono); font-size: .78rem; color: var(--muted); margin-left: auto; }
+.more { margin: 1.25rem 0 0; }
+[hidden] { display: none !important; }
+code { font-family: var(--mono); font-size: .9em; color: var(--copper); }
