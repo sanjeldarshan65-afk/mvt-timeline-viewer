@@ -17,7 +17,7 @@
     "forensics",
     "timeline"
   ],
-  "author": "",
+  "author": "Darshan Sanjel",
   "license": "MIT",
   "dependencies": {
     "date-fns": "^4.1.0"

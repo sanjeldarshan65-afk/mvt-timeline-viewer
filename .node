@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+import { test } from 'node:test';
+import { run } from 'node:test';
+
+await run(['E:/Desktop/CyberOffense/tests/unit/parser.test.js']);

@@ -1,81 +1,65 @@
-# Graphite Evidence Viewer
+# MVT Timeline Viewer
 
-An evidence viewer and timeline visualization tool for MVT (Mobile Verification Toolkit) forensic results.
+Turn [Mobile Verification Toolkit (MVT)](https://docs.mvt.re/) results into a readable incident timeline, in your browser.
 
-## Purpose
+![Timeline of the bundled sample: a phishing SMS, the link opened in Safari, then an unknown process uploading data, all flagged as IOC matches](docs/screenshot.jpg)
 
-This tool helps investigators analyze MVT results from consensually acquired mobile evidence, organizing findings into incident timelines with confidence levels (confirmed, suspicious, insufficient).
+MVT checks an iPhone backup or Android device against published indicators of compromise (IOCs) and writes a folder of JSON and CSV files. Those files are thorough but hard to read. This viewer puts every event on one timeline and marks which ones matched an indicator.
 
-## Features
+## What it does
 
-- **JSON Import**: Load MVT result files (`.json`) from Android/iOS investigations
-- **Timeline View**: Chronological visualization of all findings
-- **Evidence Categorization**: Label findings as:
-  - ✅ **Confirmed**: Strong evidence of compromise (e.g., BIGPRETZEL artifact)
-  - ⚠️ **Suspicious**: Potential indicators needing verification
-  - 🔍 **Insufficient**: Limited/no indicator found
-- **Device Grouping**: Organize findings by device (Android/iOS)
-- **Export**: Generate reports in HTML/Markdown
+- Reads the folder MVT writes with `--output` (`timeline.csv`, `timeline_detected.csv`, `<module>.json`, `<module>_detected.json`, `info.json`).
+- Shows totals, then every event in time order.
+- Labels each event:
+  - **suspicious (IOC match)**: the same row appears in `timeline_detected.csv`, meaning MVT matched it against an indicator.
+  - **context**: everything else.
+- Never labels anything "confirmed". An IOC match is a lead for an investigator, not proof of compromise.
+- Runs entirely in the browser. Files are read locally and never uploaded.
 
-## Quick Start
+## What it does not do
 
-```bash
-# Install dependencies
+- It does not scan devices or detect spyware itself. MVT does that.
+- "No suspicious events" does not mean a device is clean. Indicators only cover known threats, and logs can be missing or overwritten. See MVT's [notes on limitations](https://docs.mvt.re/en/latest/introduction/).
+
+## Try it
+
+Click **Try the sample** to load a bundled, entirely fake result set. The story it tells: a parcel-delivery text with a link, the link opened in Safari two minutes later, and then an unknown process sending data. All indicator domains use the reserved `.example` TLD.
+
+## Use it with your own results
+
+1. Scan with MVT, for example an encrypted iPhone backup:
+   ```
+   mvt-ios download-iocs
+   mvt-ios decrypt-backup -d decrypted/ <backup-folder>
+   mvt-ios check-backup --output results/ decrypted/
+   ```
+2. Open the viewer, choose the `results/` folder, then click **Build timeline**.
+
+> Results contain real messages, browsing history and app usage. Do not commit them or share screenshots of them. The `.gitignore` here excludes `mvt-results/`.
+
+## Run locally
+
+Requires Node 20 or newer.
+
+```
 npm install
-
-# Create sample data (from MVT docs)
-npm run sample-data
-
-# Start the web dashboard
-npm run dev
+npm run dev      # http://localhost:5173
+npm test         # parser tests (node:test)
+npm run sample-data   # regenerate the fake sample folder
 ```
 
-## Project Structure
+There is no build step for the viewer itself: `index.html` loads `src/parser/mvt.js` as a native ES module, so any static host (GitHub Pages included) can serve the repo as-is.
+
+## Project layout
 
 ```
-src/
-  ├── parser/
-  │   └── evidenceParser.js    # Parse MVT JSON results
-  ├── timeline/
-  │   └── TimelineView.js      # Timeline visualization
-  ├── categories/
-  │   └── EvidenceCategory.js  # Confirm/suspicious/insufficient logic
-  └── ui/
-      └── Dashboard.js         # Web UI dashboard
-tests/
-  ├── sample-mvt-data/        # Sample MVT JSON files
-  └── unit/                   # Unit tests
-docs/
-  └── API.md                  # API documentation
+index.html                     viewer page
+src/parser/mvt.js              pure parser: {filename: text} -> {info, modules, detected, timeline}
+src/parser/node.js             reads a folder from disk, for tests and scripts
+src/styles/theme.css           styles
+tests/unit/parser.test.js      tests
+tests/sample-data-generator.js writes the fake sample folder
 ```
-
-## Example Usage
-
-```javascript
-import { parseMVTResults } from './src/parser/evidenceParser.js';
-import { TimelineView } from './src/timeline/TimelineView.js';
-
-// Load MVT results
-const results = await parseMVTResults('mvt_results.json');
-
-// Create timeline
-const timeline = new TimelineView(results);
-const html = timeline.generateHTML();
-```
-
-## Research Background
-
-Based on Citizen Lab investigations (2025):
-- Android: BIGPRETZEL forensic artifact found on 2 devices
-- iOS: Zero-click compromise confirmed on iOS 18.2.1 (CVE-2025-43200)
-- Platform: "Graphite" spyware with WhatsApp/Signal monitoring
-
-## References
-
-- [Citizen Lab: Paragon Graphite Android](https://citizenlab.ca/research/a-first-look-at-paragons-proliferating-spyware-operations/)
-- [Citizen Lab: iOS Mercenary Spyware](https://citizenlab.ca/research/first-forensic-confirmation-of-paragons-ios-mercenary-spyware-finds-journalists-targeted/)
-- [Mobile Verification Toolkit Docs](https://docs.mvt.re/en/latest/)
-- [Apple CVE-2025-43200 Advisory](https://support.apple.com/en-asia/122174)
 
 ## License
 
